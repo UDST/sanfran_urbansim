@@ -1,0 +1,106 @@
+name: nrh
+
+model_type: segmented_regression
+
+segmentation_col: general_type
+
+fit_filters:
+- rent > 0
+
+predict_filters:
+- general_type != 'Residential'
+
+default_config:
+    model_expression: np.log1p(rent) ~ I(year_built < 1940) + I(year_built > 2005)
+        + np.log1p(stories) + ave_income + jobs
+    ytransform: np.exp
+
+models:
+    Industrial:
+        fit_parameters:
+            Coefficient:
+                I(year_built < 1940)[T.True]: 0.018602214179509857
+                I(year_built > 2005)[T.True]: 3.2186990031596626e-16
+                Intercept: 3.944953055060999
+                ave_income: -0.14125279577150257
+                jobs: -0.0005052701298354501
+                np.log1p(stories): 0.06699807303226907
+            Std. Error:
+                I(year_built < 1940)[T.True]: 0.08136086901447334
+                I(year_built > 2005)[T.True]: 5.783155186798252e-16
+                Intercept: 1.49847226826023
+                ave_income: 0.13302408947034663
+                jobs: 0.043255892641739624
+                np.log1p(stories): 0.13728102970790657
+            T-Score:
+                I(year_built < 1940)[T.True]: 0.22863834180778841
+                I(year_built > 2005)[T.True]: 0.5565645221672915
+                Intercept: 2.6326500253763148
+                ave_income: -1.0618587680917015
+                jobs: -0.011680954870594704
+                np.log1p(stories): 0.4880359156310319
+        fit_rsquared: 0.9837422091835915
+        fit_rsquared_adj: 0.9826583564624976
+        fitted: true
+        name: Industrial
+        ytransform: np.exp
+    Office:
+        fit_parameters:
+            Coefficient:
+                I(year_built < 1940)[T.True]: -0.0572225967133779
+                I(year_built > 2005)[T.True]: -0.025248576074170748
+                Intercept: 2.984626986042949
+                ave_income: 0.01127622234156607
+                jobs: 0.012011350961139769
+                np.log1p(stories): 0.07410712256666392
+            Std. Error:
+                I(year_built < 1940)[T.True]: 0.044830216888749636
+                I(year_built > 2005)[T.True]: 0.17453232384919298
+                Intercept: 0.506688088346863
+                ave_income: 0.03639135360146105
+                jobs: 0.025040778213353498
+                np.log1p(stories): 0.03277141262533534
+            T-Score:
+                I(year_built < 1940)[T.True]: -1.2764291739962157
+                I(year_built > 2005)[T.True]: -0.14466418321449223
+                Intercept: 5.890462110093589
+                ave_income: 0.3098599317040339
+                jobs: 0.4796716323590325
+                np.log1p(stories): 2.2613343957401533
+        fit_rsquared: 0.03799383688469504
+        fit_rsquared_adj: 0.025201201736885115
+        fitted: true
+        name: Office
+        ytransform: np.exp
+    Retail:
+        fit_parameters:
+            Coefficient:
+                I(year_built < 1940)[T.True]: -0.0667643836469014
+                I(year_built > 2005)[T.True]: -0.13409619694172104
+                Intercept: 1.2075095938942328
+                ave_income: 0.12253269705676129
+                jobs: 0.12076973219579534
+                np.log1p(stories): -0.040249055577647685
+            Std. Error:
+                I(year_built < 1940)[T.True]: 0.10351097238194291
+                I(year_built > 2005)[T.True]: 0.2444869952592013
+                Intercept: 1.1976683845652258
+                ave_income: 0.0842470647619244
+                jobs: 0.05575146360030715
+                np.log1p(stories): 0.10793970913649302
+            T-Score:
+                I(year_built < 1940)[T.True]: -0.6449981302518243
+                I(year_built > 2005)[T.True]: -0.5484798764022369
+                Intercept: 1.0082169734592932
+                ave_income: 1.4544447026496305
+                jobs: 2.1662163537376617
+                np.log1p(stories): -0.37288460289207875
+        fit_rsquared: 0.04287653527393975
+        fit_rsquared_adj: 0.0019738231061593448
+        fitted: true
+        name: Retail
+        ytransform: np.exp
+
+fitted: true
+
+min_segment_size: 10
