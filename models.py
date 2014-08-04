@@ -7,8 +7,8 @@ import numpy as np
 
 
 @sim.model('rsh_estimate')
-def rsh_estimate(homesales, zones):
-    return utils.hedonic_estimate("rsh.yaml", homesales, zones)
+def rsh_estimate(buildings, zones):
+    return utils.hedonic_estimate("rsh.yaml", buildings, zones)
 
 
 @sim.model('rsh_simulate')
@@ -17,20 +17,9 @@ def rsh_simulate(buildings, zones):
                                   "residential_sales_price")
 
 
-@sim.model('rrh_estimate')
-def rrh_estimate(apartments, zones):
-    return utils.hedonic_estimate("rrh.yaml", apartments, zones)
-
-
-@sim.model('rrh_simulate')
-def rrh_simulate(buildings, zones):
-    return utils.hedonic_simulate("rrh.yaml", buildings, zones,
-                                  "residential_rent")
-
-
 @sim.model('nrh_estimate')
-def nrh_estimate(costar, zones):
-    return utils.hedonic_estimate("nrh.yaml", costar, zones)
+def nrh_estimate(buildings, zones):
+    return utils.hedonic_estimate("nrh.yaml", buildings, zones)
 
 
 @sim.model('nrh_simulate')
@@ -48,7 +37,8 @@ def hlcm_estimate(households, buildings, zones):
 @sim.model('hlcm_simulate')
 def hlcm_simulate(households, buildings, zones):
     return utils.lcm_simulate("hlcm.yaml", households, buildings, zones,
-                              "building_id", "residential_units")
+                              "building_id", "residential_units",
+                              "vacant_residential_units")
 
 
 @sim.model('elcm_estimate')
@@ -60,7 +50,7 @@ def elcm_estimate(jobs, buildings, zones):
 @sim.model('elcm_simulate')
 def elcm_simulate(jobs, buildings, zones):
     return utils.lcm_simulate("elcm.yaml", jobs, buildings, zones,
-                              "building_id", "non_residential_units")
+                              "building_id", "job_spaces", "vacant_job_spaces")
 
 
 @sim.model('households_relocation')
@@ -97,8 +87,7 @@ def random_type(form):
 
 
 def add_extra_columns(df):
-    for col in ["residential_sales_price", "residential_rent",
-                "non_residential_rent"]:
+    for col in ["residential_sales_price", "non_residential_rent"]:
         df[col] = np.nan
     return df
 

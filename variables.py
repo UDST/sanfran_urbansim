@@ -16,9 +16,9 @@ def sum_residential_units(buildings):
     return buildings.residential_units.groupby(buildings.zone_id).sum().apply(np.log1p)
 
 
-@sim.column('zones', 'sum_nonresidential_units')
+@sim.column('zones', 'sum_job_spaces')
 def sum_nonresidential_units(buildings):
-    return buildings.non_residential_units.groupby(buildings.zone_id).sum().apply(np.log1p)
+    return buildings.job_spaces.groupby(buildings.zone_id).sum().apply(np.log1p)
 
 
 @sim.column('zones', 'population')
@@ -68,6 +68,11 @@ def poor(households):
 def renters(households):
     return households.persons[households.tenure == 2]\
         .groupby(households.zone_id).sum().apply(np.log1p)
+
+
+@sim.column('zones', 'zone_id')
+def zone_id(zones):
+    return zones.index
 
 
 @sim.column('zones_prices', 'residential')
@@ -172,11 +177,6 @@ def zone_id(households, buildings):
 @sim.column('jobs', 'zone_id', cache=True)
 def zone_id(jobs, buildings):
     return misc.reindex(buildings.zone_id, jobs.building_id)
-
-
-@sim.column('jobs', 'naics', cache=True)
-def naics(jobs):
-    return jobs.naics11cat
 
 
 #####################
