@@ -1,0 +1,18 @@
+language: python
+python:
+- '2.7'
+install:
+- sudo pip install conda
+- sudo conda init
+- |
+  conda create -p $HOME/py --yes ipython-notebook jinja2 matplotlib numpy pandas patsy pip scipy statsmodels pytables pytest pyyaml toolz "python=$TRAVIS_PYTHON_VERSION"
+- export PATH=$HOME/py/bin:$PATH
+- pip install simplejson bottle
+- pip install https://github.com/synthicity/urbansim/archive/master.zip
+before_script:
+- ipython nbconvert --to python Simulation.ipynb
+script:
+- python Simulation.py
+notifications:
+  slack:
+    secure: XTKQdhpJNhVCaT7X+VHD+vST0W+pwIjp3hDe/E1eVCqvp7iE2sBCtlnxVioMjo8z3EPtQMHZcNlpm6LOoVQlHT7idg40CDJMpTMrQGLqpDRo1ixUygK1Qfs1ZHrzg2CL3IgUtQwEDK3jVGAe2qmn/3RS1sKiYPMRACkkNtWQfMk=
