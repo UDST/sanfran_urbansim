@@ -15,4 +15,4 @@ script:
 - python Simulation.py
 notifications:
   slack:
-    secure: XTKQdhpJNhVCaT7X+VHD+vST0W+pwIjp3hDe/E1eVCqvp7iE2sBCtlnxVioMjo8z3EPtQMHZcNlpm6LOoVQlHT7idg40CDJMpTMrQGLqpDRo1ixUygK1Qfs1ZHrzg2CL3IgUtQwEDK3jVGAe2qmn/3RS1sKiYPMRACkkNtWQfMk=
+    secure: ZxKN3Ru/fm3MJx1WaspMMEwKSuXHc5cptS+vjrjqL8Ow0eldubHBPNsIZCbn8RaJuTKuH1koV+PzgQxbOL9CSi4nodtU2ArX9qbAkfqlb3vAkpddXm6Z0m1ylSseWz3tEuMg5xdmYWckaTFYOaTfSw3k3+gwIEsNSKenba//Yow=
