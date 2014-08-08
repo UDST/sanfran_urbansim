@@ -65,12 +65,12 @@ def jobs_relocation(jobs):
 
 @sim.model('households_transition')
 def households_transition(households):
-    return utils.simple_transition(households, .05)
+    return utils.simple_transition(households, .05, "building_id")
 
 
 @sim.model('jobs_transition')
 def jobs_transition(jobs):
-    return utils.simple_transition(jobs, .05)
+    return utils.simple_transition(jobs, .05, "building_id")
 
 
 @sim.model('feasibility')
