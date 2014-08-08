@@ -22,8 +22,9 @@ def sum_nonresidential_units(buildings):
 
 
 @sim.column('zones', 'population')
-def population(households):
-    return households.persons.groupby(households.zone_id).sum().apply(np.log1p)
+def population(households, zones):
+    s = households.persons.groupby(households.zone_id).sum().apply(np.log1p)
+    return s.reindex(zones.index).fillna(0)
 
 
 @sim.column('zones', 'jobs')
@@ -32,42 +33,49 @@ def jobs(jobs):
 
 
 @sim.column('zones', 'ave_lot_sqft')
-def ave_lot_sqft(buildings):
-    return buildings.unit_lot_size.groupby(buildings.zone_id).quantile().apply(np.log1p)
+def ave_lot_sqft(buildings, zones):
+    s = buildings.unit_lot_size.groupby(buildings.zone_id).quantile().apply(np.log1p)
+    return s.reindex(zones.index).fillna(s.quantile())
 
 
 @sim.column('zones', 'ave_income')
-def ave_income(households):
-    return households.income.groupby(households.zone_id).quantile().apply(np.log1p)
+def ave_income(households, zones):
+    s = households.income.groupby(households.zone_id).quantile().apply(np.log1p)
+    return s.reindex(zones.index).fillna(s.quantile())
 
 
 @sim.column('zones', 'hhsize')
-def hhsize(households):
-    return households.persons.groupby(households.zone_id).quantile().apply(np.log1p)
+def hhsize(households, zones):
+    s = households.persons.groupby(households.zone_id).quantile().apply(np.log1p)
+    return s.reindex(zones.index).fillna(s.quantile())
 
 
 @sim.column('zones', 'ave_unit_sqft')
-def ave_unit_sqft(buildings):
-    return buildings.unit_sqft[buildings.general_type == "Residential"]\
+def ave_unit_sqft(buildings, zones):
+    s = buildings.unit_sqft[buildings.general_type == "Residential"]\
         .groupby(buildings.zone_id).quantile().apply(np.log1p)
+    return s.reindex(zones.index).fillna(s.quantile())
 
 
 @sim.column('zones', 'sfdu')
-def sfdu(buildings):
-    return buildings.residential_units[buildings.building_type_id == 1]\
+def sfdu(buildings, zones):
+    s = buildings.residential_units[buildings.building_type_id == 1]\
         .groupby(buildings.zone_id).sum().apply(np.log1p)
+    return s.reindex(zones.index).fillna(0)
 
 
 @sim.column('zones', 'poor')
-def poor(households):
-    return households.persons[households.income < 40000]\
+def poor(households, zones):
+    s = households.persons[households.income < 40000]\
         .groupby(households.zone_id).sum().apply(np.log1p)
+    return s.reindex(zones.index).fillna(0)
 
 
 @sim.column('zones', 'renters')
-def renters(households):
-    return households.persons[households.tenure == 2]\
+def renters(households, zones):
+    s = households.persons[households.tenure == 2]\
         .groupby(households.zone_id).sum().apply(np.log1p)
+    return s.reindex(zones.index).fillna(0)
 
 
 @sim.column('zones', 'zone_id')
@@ -121,13 +129,13 @@ def general_type(buildings, building_type_map):
 
 @sim.column('buildings', 'unit_sqft', cache=True)
 def unit_sqft(buildings):
-    return buildings.building_sqft / buildings.residential_units
+    return buildings.building_sqft / buildings.residential_units.replace(0, 1)
 
 
 @sim.column('buildings', 'unit_lot_size', cache=True)
 def unit_lot_size(buildings, parcels):
     return misc.reindex(parcels.parcel_size, buildings.parcel_id) / \
-        buildings.residential_units
+        buildings.residential_units.replace(0, 1)
 
 
 @sim.column('buildings', 'sqft_per_job', cache=True)

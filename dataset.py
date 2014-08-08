@@ -1,8 +1,6 @@
-import numpy as np
 import pandas as pd
-import os
 import assumptions
-from urbansim.utils import misc
+import utils
 import urbansim.sim.simulation as sim
 
 import warnings
@@ -12,12 +10,16 @@ warnings.filterwarnings('ignore', category=pd.io.pytables.PerformanceWarning)
 @sim.table_source('jobs')
 def jobs(store):
     df = store['jobs']
+    df = utils.fill_nas_from_config('jobs', df)
     return df
 
 
 @sim.table_source('buildings')
 def buildings(store):
     df = store['buildings']
+    df = df[df.building_type_id > 0]
+    df = df[df.building_type_id <= 14]
+    df = utils.fill_nas_from_config('buildings', df)
     return df
 
 

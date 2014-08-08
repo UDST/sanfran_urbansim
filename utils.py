@@ -13,6 +13,12 @@ def get_run_filename():
     return os.path.join(misc.runs_dir(), "run%d.h5" % misc.get_run_number())
 
 
+def change_store(store_name):
+    sim.add_injectable("store",
+                       pd.HDFStore(os.path.join(misc.data_dir(),
+                                                store_name), mode="r"))
+
+
 def change_scenario(scenario):
     assert scenario in sim.get_injectable("scenario_inputs"), \
         "Invalid scenario name"
@@ -40,12 +46,40 @@ def enable_logging():
 
 
 def deal_with_nas(df):
-    lenbefore = len(df)
-    df = df.dropna(how='any')
-    lenafter = len(df)
-    if lenafter != lenbefore:
-        print "Dropped %d rows because they contained nans" % \
-              (lenbefore-lenafter)
+    df_cnt = len(df)
+    fail = False
+
+    df = df.replace([np.inf, -np.inf], np.nan)
+    for col in df.columns:
+        s_cnt = df[col].count()
+        if df_cnt != s_cnt:
+            fail = True
+            print "Found %d nas or inf (out of %d) in column %s" % \
+                  (df_cnt-s_cnt, df_cnt, col)
+
+    assert not fail, "NAs were found in dataframe, please fix"
+    return df
+
+
+def fill_nas_from_config(dfname, df):
+    df_cnt = len(df)
+    fillna_config = sim.get_injectable("fillna_config")
+    fillna_config_df = fillna_config[dfname]
+    for fname in fillna_config_df:
+        filltyp, dtyp = fillna_config_df[fname]
+        s_cnt = df[fname].count()
+        fill_cnt = df_cnt - s_cnt
+        if filltyp == "zero":
+            val = 0
+        elif filltyp == "mode":
+            val = df[fname].dropna().value_counts().idxmax()
+        elif filltyp == "median":
+            val = df[fname].dropna().quantile()
+        else:
+            assert 0, "Fill type not found!"
+        print "Filling column {} with value {} ({} values)".\
+            format(fname, val, fill_cnt)
+        df[fname] = df[fname].fillna(val).astype(dtyp)
     return df
 
 
@@ -131,11 +165,11 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
     locations_df = to_frame([buildings, nodes], cfg,
                             [supply_fname, vacant_fname])
 
-    available_units = locations_df[supply_fname]
-    vacant_units = locations_df[vacant_fname]
+    available_units = buildings[supply_fname]
+    vacant_units = buildings[vacant_fname]
 
     print "There are %d total available units" % available_units.sum()
-    print "    and %d total choosers" % len(choosers.index)
+    print "    and %d total choosers" % len(choosers)
     print "    but there are %d overfull buildings" % \
           len(vacant_units[vacant_units < 0])
 
@@ -143,12 +177,21 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
     units = locations_df.loc[np.repeat(vacant_units.index,
                              vacant_units.values.astype('int'))].reset_index()
 
-    print "    for a total of %d empty units" % vacant_units.sum()
+    print "    for a total of %d temporarily empty units" % vacant_units.sum()
     print "    in %d buildings total in the region" % len(vacant_units)
 
     movers = choosers_df[choosers_df[out_fname] == -1]
 
+    if len(movers) > vacant_units.sum():
+        print "WARNING: Not enough locations for movers"
+        print "    reducing locations to size of movers for performance gain"
+        movers = movers.head(vacant_units.sum())
+
     new_units, _ = yaml_to_class(cfg).predict_from_cfg(movers, units, cfg)
+
+    # new_units returns nans when there aren't enough units,
+    # get rid of them and they'll stay as -1s
+    new_units = new_units.dropna()
 
     # go from units back to buildings
     new_buildings = pd.Series(units.loc[new_units.values][out_fname].values,
@@ -156,6 +199,10 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
 
     choosers.update_col_from_series(out_fname, new_buildings)
     _print_number_unplaced(choosers, out_fname)
+
+    vacant_units = buildings[vacant_fname]
+    print "    and there are now %d empty units" % vacant_units.sum()
+    print "    and %d overfull buildings" % len(vacant_units[vacant_units < 0])
 
 
 def simple_relocation(choosers, relocation_rate, fieldname):
@@ -171,7 +218,7 @@ def simple_relocation(choosers, relocation_rate, fieldname):
     _print_number_unplaced(choosers, fieldname)
 
 
-def simple_transition(tbl, rate):
+def simple_transition(tbl, rate, location_fname):
     transition = GrowthRateTransition(rate)
     df = tbl.to_frame(tbl.local_columns)
 
@@ -179,6 +226,7 @@ def simple_transition(tbl, rate):
     df, added, copied, removed = transition.transition(df, None)
     print "%d agents after transition" % len(df.index)
 
+    df[location_fname].loc[added] = -1
     sim.add_table(tbl.name, df)
 
 
@@ -297,6 +345,9 @@ def run_developer(forms, agents, buildings, supply_fname, parcel_size,
                                buildings[supply_fname].sum(),
                                target_vacancy)
 
+    print "{:,} feasible buildings before running developer".format(
+          len(dev.feasibility))
+
     new_buildings = dev.pick(forms,
                              target_units,
                              parcel_size,
@@ -306,6 +357,8 @@ def run_developer(forms, agents, buildings, supply_fname, parcel_size,
                              drop_after_build=True,
                              residential=residential,
                              bldg_sqft_per_job=bldg_sqft_per_job)
+
+    sim.add_table("feasibility", dev.feasibility)
 
     if new_buildings is None:
         return
@@ -326,11 +379,15 @@ def run_developer(forms, agents, buildings, supply_fname, parcel_size,
     if add_more_columns_callback is not None:
         new_buildings = add_more_columns_callback(new_buildings)
 
-    print "Adding {} buildings with {:,} {}".\
+    print "Adding {:,} buildings with {:,} {}".\
         format(len(new_buildings),
-               new_buildings[supply_fname].sum(),
+               int(new_buildings[supply_fname].sum()),
                supply_fname)
+
+    print "{:,} feasible buildings after running developer".format(
+          len(dev.feasibility))
 
     all_buildings = dev.merge(buildings.to_frame(buildings.local_columns),
                               new_buildings[buildings.local_columns])
+
     sim.add_table("buildings", all_buildings)
