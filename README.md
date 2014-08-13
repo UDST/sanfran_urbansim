@@ -5,7 +5,7 @@ This repository contains a simple (but relatively full-featured) example of Urba
 
 See [the UrbanSim GitHub](https://github.com/synthicity/urbansim) for more information on UrbanSim.
 
-This example is [documented in detail](https://http://synthicity.github.io/urbansim/examples.html#complete-example-san-francisco-urbansim-modules) as part of the UrbanSim documentation.
+This example is [documented in detail](https://synthicity.github.io/urbansim/examples.html#complete-example-san-francisco-urbansim-modules) as part of the UrbanSim documentation.
 
 ##Data Caveats
 
