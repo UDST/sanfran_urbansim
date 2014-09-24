@@ -85,7 +85,8 @@ def zone_id(zones):
 
 @sim.column('zones_prices', 'residential')
 def residential(buildings):
-    return buildings.residential_sales_price\
+    return buildings\
+        .residential_sales_price[buildings.general_type == "Residential"]\
         .groupby(buildings.zone_id).quantile()
 
 

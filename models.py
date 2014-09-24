@@ -88,7 +88,7 @@ def random_type(form):
 
 def add_extra_columns(df):
     for col in ["residential_sales_price", "non_residential_rent"]:
-        df[col] = np.nan
+        df[col] = 0
     return df
 
 
