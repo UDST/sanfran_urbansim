@@ -214,12 +214,6 @@ def max_far(parcels, scenario):
         reindex(parcels.index).fillna(0)
 
 
-@sim.column('parcels', 'max_dua', cache=True)
-def max_dua(parcels, scenario):
-    return utils.conditional_upzone(scenario, "max_far", "dua_up").\
-        reindex(parcels.index).fillna(0)
-
-
 @sim.column('parcels', 'max_height', cache=True)
 def max_height(parcels, zoning_baseline):
     return zoning_baseline.max_height.reindex(parcels.index).fillna(0)
