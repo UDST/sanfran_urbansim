@@ -193,8 +193,16 @@ def zone_id(jobs, buildings):
 #####################
 
 
-def parcel_average_price(use):
-    return misc.reindex(sim.get_table('zones_prices')[use],
+def parcel_average_price(use, quantile=None):
+    if use == "residential":
+        buildings = sim.get_table("buildings")
+        price = buildings\
+            .residential_sales_price[buildings.general_type == "Residential"]\
+            .groupby(buildings.zone_id).quantile(quantile)
+    else:
+        price = sim.get_table('zones_prices')[use]
+
+    return misc.reindex(price,
                         sim.get_table('parcels').zone_id)
 
 
@@ -211,6 +219,12 @@ def parcel_is_allowed(form):
 @sim.column('parcels', 'max_far', cache=True)
 def max_far(parcels, scenario):
     return utils.conditional_upzone(scenario, "max_far", "far_up").\
+        reindex(parcels.index).fillna(0)
+
+
+@sim.column('parcels', 'max_dua', cache=True)
+def max_dua(parcels, scenario):
+    return utils.conditional_upzone(scenario, "max_dua", "dua_up").\
         reindex(parcels.index).fillna(0)
 
 
@@ -242,14 +256,27 @@ def total_sqft(parcels, buildings):
         reindex(parcels.index).fillna(0)
 
 
+# returns the oldest building on the land and fills missing values with 9999 -
+# for use with historical preservation
+@sim.column('parcels', 'oldest_building')
+def oldest_building(parcels, buildings):
+    return buildings.year_built.groupby(buildings.parcel_id).min().\
+        reindex(parcels.index).fillna(9999)
+
+
+@sim.column('parcels', 'building_purchase_price')
+def building_purchase_price(parcels):
+    return (parcels.total_sqft * parcel_average_price("residential", .5)).\
+        reindex(parcels.index).fillna(0)
+
+
 @sim.column('parcels', 'land_cost')
 def land_cost(parcels):
-    # TODO
-    # this needs to account for cost for the type of building it is
-    return (parcels.total_sqft * parcel_average_price("residential")).\
-        reindex(parcels.index).fillna(0)
+    return parcels.building_purchase_price + parcels.parcel_size * 20.0
 
 
 @sim.column('parcels', 'ave_unit_size')
 def ave_unit_size(parcels, zones):
-    return misc.reindex(zones.ave_unit_sqft, parcels.zone_id)
+    s = misc.reindex(zones.ave_unit_sqft, parcels.zone_id)
+    s[s < 800] = 800
+    return s

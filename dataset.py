@@ -1,10 +1,13 @@
 import pandas as pd
 import assumptions
 import utils
+import os
 import urbansim.sim.simulation as sim
+from urbansim.utils import misc
 
 import warnings
 warnings.filterwarnings('ignore', category=pd.io.pytables.PerformanceWarning)
+pd.options.mode.chained_assignment = None
 
 
 @sim.table_source('jobs')
@@ -59,10 +62,19 @@ def zoning_for_parcels(store):
     return df
 
 
-# this is the actual zoning
+# this is the actual baseline zoning, now editable in an excel file
+# (the zoning from the h5 file doesn't have all the parameters)
+# instead of creating a new h5 file I'm going to add zoning as a csv file
+# which is easily browsable in excel and is only 170k bytes
 @sim.table_source('zoning')
 def zoning(store):
-    df = store['zoning']
+    df = store.zoning
+    df2 = pd.read_csv(os.path.join(misc.data_dir(), "baseline_zoning.csv"),
+                      index_col="id")
+    # this function actually overwrites all columns in the h5 zoning that are
+    # available in the csv zoning, but preserves the allowable building types
+    for col in df2.columns:
+        df[col] = df2[col]
     return df
 
 
