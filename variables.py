@@ -264,9 +264,16 @@ def oldest_building(parcels, buildings):
         reindex(parcels.index).fillna(9999)
 
 
+# for debugging reasons this is split out into its own function
+@sim.column('parcels', 'building_purchase_price_sqft')
+def building_purchase_price_sqft():
+    return parcel_average_price("residential", .6)
+
+
+# for debugging reasons this is split out into its own function
 @sim.column('parcels', 'building_purchase_price')
 def building_purchase_price(parcels):
-    return (parcels.total_sqft * parcel_average_price("residential", .5)).\
+    return (parcels.total_sqft * parcels.building_purchase_price_sqft).\
         reindex(parcels.index).fillna(0)
 
 

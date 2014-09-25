@@ -16,8 +16,13 @@ def rsh_estimate(buildings, zones):
 
 @sim.model('rsh_simulate')
 def rsh_simulate(buildings, zones):
-    return utils.hedonic_simulate("rsh.yaml", buildings, zones,
-                                  "residential_sales_price")
+    ret = utils.hedonic_simulate("rsh.yaml", buildings, zones,
+                                 "residential_sales_price")
+    s = buildings.residential_sales_price
+    s[s > 1200] = 1200
+    s[s < 250] = 250
+    buildings.update_col_from_series("residential_sales_price", s)
+    return ret
 
 
 @sim.model('nrh_estimate')
@@ -86,7 +91,11 @@ def feasibility(parcels):
                           residential_to_yearly=True,
                           pass_through=["oldest_building", "total_sqft",
                                         "max_far", "max_dua", "land_cost",
-                                        "residential"])
+                                        "residential", "min_max_fars",
+                                        "max_far_from_dua", "max_height",
+                                        "max_far_from_heights",
+                                        "building_purchase_price",
+                                        "building_purchase_price_sqft"])
 
 
 def add_extra_columns(df):
@@ -108,7 +117,7 @@ def residential_developer(feasibility, households, buildings, parcels, year):
         feasibility,
         year=year,
         target_vacancy=.06,
-        min_unit_size=1000,
+        min_unit_size=800,
         form_to_btype_callback=sim.get_injectable("form_to_btype_f"),
         add_more_columns_callback=add_extra_columns,
         bldg_sqft_per_job=400.0)
