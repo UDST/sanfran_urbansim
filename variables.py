@@ -169,7 +169,7 @@ def vacant_residential_units(buildings, jobs):
 
 @sim.column('households', 'income_quartile', cache=True)
 def income_quartile(households):
-    return pd.Series(pd.qcut(households.income, 4).labels,
+    return pd.Series(pd.qcut(households.income, 4, labels=False),
                      index=households.index)
 
 
