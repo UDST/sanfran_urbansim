@@ -174,7 +174,7 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
           len(vacant_units[vacant_units < 0])
 
     vacant_units = vacant_units[vacant_units > 0]
-    units = locations_df.loc[np.repeat(vacant_units.index,
+    units = locations_df.loc[np.repeat(vacant_units.index.values,
                              vacant_units.values.astype('int'))].reset_index()
 
     print "    for a total of %d temporarily empty units" % vacant_units.sum()
@@ -226,7 +226,7 @@ def simple_transition(tbl, rate, location_fname):
     df, added, copied, removed = transition.transition(df, None)
     print "%d agents after transition" % len(df.index)
 
-    df[location_fname].loc[added] = -1
+    df.loc[added, location_fname] = -1
     sim.add_table(tbl.name, df)
 
 
