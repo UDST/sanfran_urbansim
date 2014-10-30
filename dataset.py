@@ -55,7 +55,7 @@ def zones_prices(store):
 @sim.table_source('zoning_for_parcels')
 def zoning_for_parcels(store):
     df = store['zoning_for_parcels']
-    df = df.reset_index().drop_duplicates(cols='parcel').set_index('parcel')
+    df = df.reset_index().drop_duplicates(subset='parcel').set_index('parcel')
     return df
 
 

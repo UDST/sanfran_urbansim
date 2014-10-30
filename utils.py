@@ -226,7 +226,7 @@ def simple_transition(tbl, rate, location_fname):
     df, added, copied, removed = transition.transition(df, None)
     print "%d agents after transition" % len(df.index)
 
-    df[location_fname].loc[added] = -1
+    df.loc[added, location_fname] = -1
     sim.add_table(tbl.name, df)
 
 
