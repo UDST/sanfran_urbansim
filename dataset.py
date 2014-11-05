@@ -7,14 +7,14 @@ import warnings
 warnings.filterwarnings('ignore', category=pd.io.pytables.PerformanceWarning)
 
 
-@sim.table_source('jobs')
+@sim.table('jobs', cache=True)
 def jobs(store):
     df = store['jobs']
     df = utils.fill_nas_from_config('jobs', df)
     return df
 
 
-@sim.table_source('buildings')
+@sim.table('buildings', cache=True)
 def buildings(store):
     df = store['buildings']
     df = df[df.building_type_id > 0]
@@ -25,34 +25,34 @@ def buildings(store):
     return df
 
 
-@sim.table_source('households')
+@sim.table('households', cache=True)
 def households(store):
     df = store['households']
     return df
 
 
-@sim.table_source('parcels')
+@sim.table('parcels', cache=True)
 def parcels(store):
     df = store['parcels']
     return df
 
 
 # these are shapes - "zones" in the bay area
-@sim.table_source('zones')
+@sim.table('zones', cache=True)
 def zones(store):
     df = store['zones']
     return df
 
 
 # starts with the same underlying shapefile, but is used later in the simulation
-@sim.table_source('zones_prices')
+@sim.table('zones_prices', cache=True)
 def zones_prices(store):
     df = store['zones']
     return df
 
 
 # this is the mapping of parcels to zoning attributes
-@sim.table_source('zoning_for_parcels')
+@sim.table('zoning_for_parcels', cache=True)
 def zoning_for_parcels(store):
     df = store['zoning_for_parcels']
     df = df.reset_index().drop_duplicates(subset='parcel').set_index('parcel')
@@ -60,7 +60,7 @@ def zoning_for_parcels(store):
 
 
 # this is the actual zoning
-@sim.table_source('zoning')
+@sim.table('zoning', cache=True)
 def zoning(store):
     df = store['zoning']
     return df
@@ -68,7 +68,7 @@ def zoning(store):
 
 # zoning for use in the "baseline" scenario
 # comes in the hdf5
-@sim.table_source('zoning_baseline')
+@sim.table('zoning_baseline', cache=True)
 def zoning_baseline(zoning, zoning_for_parcels):
     df = pd.merge(zoning_for_parcels.to_frame(),
                   zoning.to_frame(),
