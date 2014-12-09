@@ -1,6 +1,6 @@
 name: Household Location Choice Model
 
-model_type: segmented_locationchoice
+model_type: segmented_discretechoice
 
 segmentation_col: income_quartile
 
@@ -21,6 +21,12 @@ choice_column: null
 sample_size: 100
 
 estimation_sample_size: 3000
+
+probability_mode: 'single_chooser'
+
+choice_mode: 'aggregate'
+
+remove_alts: true
 
 default_config:
     model_expression: np.log1p(residential_sales_price) + np.log1p(unit_sqft) + sum_residential_units

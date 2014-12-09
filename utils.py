@@ -1,5 +1,5 @@
 from urbansim.models import RegressionModel, SegmentedRegressionModel, \
-    MNLLocationChoiceModel, SegmentedMNLLocationChoiceModel, \
+    MNLDiscreteChoiceModel, SegmentedMNLDiscreteChoiceModel, \
     GrowthRateTransition
 from urbansim.developer import sqftproforma, developer
 import numpy as np
@@ -102,8 +102,8 @@ def yaml_to_class(cfg):
     return {
         "regression": RegressionModel,
         "segmented_regression": SegmentedRegressionModel,
-        "locationchoice": MNLLocationChoiceModel,
-        "segmented_locationchoice": SegmentedMNLLocationChoiceModel
+        "discretechoice": MNLDiscreteChoiceModel,
+        "segmented_discretechoice": SegmentedMNLDiscreteChoiceModel
     }[model_type]
 
 
