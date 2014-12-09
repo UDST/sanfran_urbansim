@@ -3,7 +3,6 @@ import random
 import utils
 import dataset
 import variables
-import numpy as np
 
 
 @sim.model('rsh_estimate')
@@ -125,8 +124,3 @@ def non_residential_developer(feasibility, jobs, buildings, parcels, year):
                         add_more_columns_callback=add_extra_columns,
                         residential=False,
                         bldg_sqft_per_job=400.0)
-
-
-@sim.model("clear_cache")
-def clear_cache():
-    sim.clear_cache()
