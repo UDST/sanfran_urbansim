@@ -1,6 +1,6 @@
 name: elcm
 
-model_type: segmented_locationchoice
+model_type: segmented_discretechoice
 
 segmentation_col: job_category
 
@@ -25,6 +25,12 @@ choice_column: null
 sample_size: 100
 
 estimation_sample_size: 5000
+
+probability_mode: 'single_chooser'
+
+choice_mode: 'aggregate'
+
+remove_alts: true
 
 default_config:
     model_expression: np.log1p(non_residential_rent) + sum_job_spaces + sum_residential_units

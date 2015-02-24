@@ -118,33 +118,33 @@ def zone_id(zones):
 #####################
 
 
-@sim.column('buildings', 'zone_id', cache=True)
+@sim.column('buildings', 'zone_id', cache=True, cache_scope='iteration')
 def zone_id(buildings, parcels):
     return misc.reindex(parcels.zone_id, buildings.parcel_id)
 
 
-@sim.column('buildings', 'general_type', cache=True)
+@sim.column('buildings', 'general_type', cache=True, cache_scope='iteration')
 def general_type(buildings, building_type_map):
     return buildings.building_type_id.map(building_type_map)
 
 
-@sim.column('buildings', 'unit_sqft', cache=True)
+@sim.column('buildings', 'unit_sqft', cache=True, cache_scope='iteration')
 def unit_sqft(buildings):
     return buildings.building_sqft / buildings.residential_units.replace(0, 1)
 
 
-@sim.column('buildings', 'unit_lot_size', cache=True)
+@sim.column('buildings', 'unit_lot_size', cache=True, cache_scope='iteration')
 def unit_lot_size(buildings, parcels):
     return misc.reindex(parcels.parcel_size, buildings.parcel_id) / \
         buildings.residential_units.replace(0, 1)
 
 
-@sim.column('buildings', 'sqft_per_job', cache=True)
+@sim.column('buildings', 'sqft_per_job', cache=True, cache_scope='iteration')
 def sqft_per_job(buildings, building_sqft_per_job):
     return buildings.building_type_id.fillna(-1).map(building_sqft_per_job)
 
 
-@sim.column('buildings', 'job_spaces', cache=True)
+@sim.column('buildings', 'job_spaces', cache=True, cache_scope='iteration')
 def job_spaces(buildings):
     return (buildings.non_residential_sqft /
             buildings.sqft_per_job).fillna(0).astype('int')
@@ -167,13 +167,14 @@ def vacant_residential_units(buildings, jobs):
 #####################
 
 
-@sim.column('households', 'income_quartile', cache=True)
+@sim.column(
+    'households', 'income_quartile', cache=True, cache_scope='iteration')
 def income_quartile(households):
     return pd.Series(pd.qcut(households.income, 4, labels=False),
                      index=households.index)
 
 
-@sim.column('households', 'zone_id', cache=True)
+@sim.column('households', 'zone_id', cache=True, cache_scope='iteration')
 def zone_id(households, buildings):
     return misc.reindex(buildings.zone_id, households.building_id)
 
@@ -183,7 +184,7 @@ def zone_id(households, buildings):
 #####################
 
 
-@sim.column('jobs', 'zone_id', cache=True)
+@sim.column('jobs', 'zone_id', cache=True, cache_scope='iteration')
 def zone_id(jobs, buildings):
     return misc.reindex(buildings.zone_id, jobs.building_id)
 
@@ -214,29 +215,29 @@ def max_far(parcels, scenario):
         reindex(parcels.index).fillna(0)
 
 
-@sim.column('parcels', 'max_height', cache=True)
+@sim.column('parcels', 'max_height', cache=True, cache_scope='iteration')
 def max_height(parcels, zoning_baseline):
     return zoning_baseline.max_height.reindex(parcels.index).fillna(0)
 
 
-@sim.column('parcels', 'parcel_size', cache=True)
+@sim.column('parcels', 'parcel_size', cache=True, cache_scope='iteration')
 def parcel_size(parcels):
     return parcels.shape_area * 10.764
 
 
-@sim.column('parcels', 'total_units', cache=True)
+@sim.column('parcels', 'total_units', cache=True, cache_scope='iteration')
 def total_units(parcels, buildings):
     return buildings.residential_units.groupby(buildings.parcel_id).sum().\
         reindex(parcels.index).fillna(0)
 
 
-@sim.column('parcels', 'total_job_spaces', cache=True)
+@sim.column('parcels', 'total_job_spaces', cache=True, cache_scope='iteration')
 def total_job_spaces(parcels, buildings):
     return buildings.job_spaces.groupby(buildings.parcel_id).sum().\
         reindex(parcels.index).fillna(0)
 
 
-@sim.column('parcels', 'total_sqft', cache=True)
+@sim.column('parcels', 'total_sqft', cache=True, cache_scope='iteration')
 def total_sqft(parcels, buildings):
     return buildings.building_sqft.groupby(buildings.parcel_id).sum().\
         reindex(parcels.index).fillna(0)
