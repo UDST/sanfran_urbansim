@@ -19,8 +19,6 @@ def buildings(store):
     df = store['buildings']
     df = df[df.building_type_id > 0]
     df = df[df.building_type_id <= 14]
-    df["residential_sales_price"] = 0
-    df["non_residential_rent"] = 0
     df = utils.fill_nas_from_config('buildings', df)
     return df
 
