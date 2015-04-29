@@ -26,6 +26,8 @@ sample_size: 100
 
 estimation_sample_size: 5000
 
+prediction_sample_size: null
+
 default_config:
     model_expression: np.log1p(non_residential_rent) + sum_job_spaces + sum_residential_units
         + ave_unit_sqft + ave_lot_sqft + ave_income + hhsize + jobs + poor - 1
