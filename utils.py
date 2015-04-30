@@ -1,12 +1,13 @@
+import os
+
+import numpy as np
+import orca
+import pandas as pd
 from urbansim.models import RegressionModel, SegmentedRegressionModel, \
     MNLDiscreteChoiceModel, SegmentedMNLDiscreteChoiceModel, \
     GrowthRateTransition
 from urbansim.developer import sqftproforma, developer
-import numpy as np
-import pandas as pd
-import urbansim.sim.simulation as sim
 from urbansim.utils import misc
-import os
 
 
 def get_run_filename():
@@ -14,25 +15,25 @@ def get_run_filename():
 
 
 def change_store(store_name):
-    sim.add_injectable("store",
-                       pd.HDFStore(os.path.join(misc.data_dir(),
-                                                store_name), mode="r"))
+    orca.add_injectable(
+        "store",
+        pd.HDFStore(os.path.join(misc.data_dir(), store_name), mode="r"))
 
 
 def change_scenario(scenario):
-    assert scenario in sim.get_injectable("scenario_inputs"), \
+    assert scenario in orca.get_injectable("scenario_inputs"), \
         "Invalid scenario name"
     print "Changing scenario to '%s'" % scenario
-    sim.add_injectable("scenario", scenario)
+    orca.add_injectable("scenario", scenario)
 
 
 def conditional_upzone(scenario, attr_name, upzone_name):
-    scenario_inputs = sim.get_injectable("scenario_inputs")
-    zoning_baseline = sim.get_table(
+    scenario_inputs = orca.get_injectable("scenario_inputs")
+    zoning_baseline = orca.get_table(
         scenario_inputs["baseline"]["zoning_table_name"])
     attr = zoning_baseline[attr_name]
     if scenario != "baseline":
-        zoning_scenario = sim.get_table(
+        zoning_scenario = orca.get_table(
             scenario_inputs[scenario]["zoning_table_name"])
         upzone = zoning_scenario[upzone_name].dropna()
         attr = pd.concat([attr, upzone], axis=1).max(skipna=True, axis=1)
@@ -63,7 +64,7 @@ def deal_with_nas(df):
 
 def fill_nas_from_config(dfname, df):
     df_cnt = len(df)
-    fillna_config = sim.get_injectable("fillna_config")
+    fillna_config = orca.get_injectable("fillna_config")
     fillna_config_df = fillna_config[dfname]
     for fname in fillna_config_df:
         filltyp, dtyp = fillna_config_df[fname]
@@ -88,8 +89,8 @@ def to_frame(tables, cfg, additional_columns=[]):
     tables = [t for t in tables if t is not None]
     columns = misc.column_list(tables, cfg.columns_used()) + additional_columns
     if len(tables) > 1:
-        df = sim.merge_tables(target=tables[0].name,
-                              tables=tables, columns=columns)
+        df = orca.merge_tables(target=tables[0].name,
+                               tables=tables, columns=columns)
     else:
         df = tables[0].to_frame(columns)
     df = deal_with_nas(df)
@@ -227,7 +228,7 @@ def simple_transition(tbl, rate, location_fname):
     print "%d agents after transition" % len(df.index)
 
     df.loc[added, location_fname] = -1
-    sim.add_table(tbl.name, df)
+    orca.add_table(tbl.name, df)
 
 
 def _print_number_unplaced(df, fieldname):
@@ -281,7 +282,7 @@ def run_feasibility(parcels, parcel_price_callback,
 
     far_predictions = pd.concat(d.values(), keys=d.keys(), axis=1)
 
-    sim.add_table("feasibility", far_predictions)
+    orca.add_table("feasibility", far_predictions)
 
 
 def run_developer(forms, agents, buildings, supply_fname, parcel_size,
@@ -358,7 +359,7 @@ def run_developer(forms, agents, buildings, supply_fname, parcel_size,
                              residential=residential,
                              bldg_sqft_per_job=bldg_sqft_per_job)
 
-    sim.add_table("feasibility", dev.feasibility)
+    orca.add_table("feasibility", dev.feasibility)
 
     if new_buildings is None:
         return
@@ -390,4 +391,4 @@ def run_developer(forms, agents, buildings, supply_fname, parcel_size,
     all_buildings = dev.merge(buildings.to_frame(buildings.local_columns),
                               new_buildings[buildings.local_columns])
 
-    sim.add_table("buildings", all_buildings)
+    orca.add_table("buildings", all_buildings)
