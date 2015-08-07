@@ -7,6 +7,11 @@ import utils
 import variables
 
 
+@orca.injectable()
+def year(iter_var):
+    return iter_var
+
+
 @orca.step('rsh_estimate')
 def rsh_estimate(buildings, zones):
     return utils.hedonic_estimate("rsh.yaml", buildings, zones)
