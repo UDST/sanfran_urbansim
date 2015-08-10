@@ -1,10 +1,11 @@
-import urbansim.sim.simulation as sim
 import os
+
+import orca
 import pandas as pd
 from urbansim.utils import misc
 
 
-sim.add_injectable("building_sqft_per_job", {
+orca.add_injectable("building_sqft_per_job", {
     -1: 400,
     1: 400,
     2: 400,
@@ -25,7 +26,7 @@ sim.add_injectable("building_sqft_per_job", {
 
 # this maps building type ids to general building types
 # basically just reduces dimensionality
-sim.add_injectable("building_type_map", {
+orca.add_injectable("building_type_map", {
     1: "Residential",
     2: "Residential",
     3: "Residential",
@@ -49,7 +50,7 @@ sim.add_injectable("building_type_map", {
 # in the building table - in the long run, the developer
 # forms and the building types should be the same and the
 # developer model should account for the differences
-sim.add_injectable("form_to_btype", {
+orca.add_injectable("form_to_btype", {
     'residential': [1, 2, 3],
     'industrial': [7, 8, 9],
     'retail': [10, 11],
@@ -59,11 +60,11 @@ sim.add_injectable("form_to_btype", {
 })
 
 
-sim.add_injectable("store", pd.HDFStore(os.path.join(misc.data_dir(),
+orca.add_injectable("store", pd.HDFStore(os.path.join(misc.data_dir(),
                                                      "sanfran_public.h5"),
                                         mode="r"))
 
-sim.add_injectable("fillna_config", {
+orca.add_injectable("fillna_config", {
     "buildings": {
         "residential_sales_price": ("zero", "int"),
         "non_residential_rent": ("zero", "int"),
@@ -80,7 +81,7 @@ sim.add_injectable("fillna_config", {
 
 # this keeps track of all of the inputs that get "switched"
 # whenever a scenario is changed
-sim.add_injectable("scenario_inputs", {
+orca.add_injectable("scenario_inputs", {
     "baseline": {
         "zoning_table_name": "zoning_baseline"
     },
@@ -90,4 +91,4 @@ sim.add_injectable("scenario_inputs", {
 })
 
 
-sim.add_injectable("scenario", "baseline")
+orca.add_injectable("scenario", "baseline")
