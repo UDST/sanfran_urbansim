@@ -3,9 +3,9 @@ sanfran_urbansim
 
 This repository contains a simple (but relatively full-featured) example of UrbanSim for San Francisco.
 
-See [the UrbanSim GitHub](https://github.com/synthicity/urbansim) for more information on UrbanSim.
+See [the UrbanSim GitHub](https://github.com/udst/urbansim) for more information on UrbanSim.
 
-This example is [documented in detail](https://synthicity.github.io/urbansim/examples.html#complete-example-san-francisco-urbansim-modules) as part of the UrbanSim documentation.
+This example is [documented in detail](https://udst.github.io/urbansim/examples.html#complete-example-san-francisco-urbansim-modules) as part of the UrbanSim documentation.
 
 ##Data Caveats
 
@@ -13,9 +13,7 @@ This repository contains the parcel, buildings, and zoning data which are public
 
 ##To Run this Example
 
-* [Install UrbanSim](http://synthicity.github.io/urbansim/gettingstarted.html#installation)
+* [Install UrbanSim](https://udst.github.io/urbansim/gettingstarted.html#installation)
 * Run `ipython notebook` and execute the included notebooks
 
 The *estimation* notebook allows the estimation of price models and location choices, the *simulation* notebook runs the full UrbanSim simulation, and the *exploration* notebook allows the interactive exploration of the included data using web mapping tools (primarily enabling the interaction between Leaflet and Pandas).
-
-
