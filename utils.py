@@ -118,7 +118,7 @@ def hedonic_simulate(cfg, tbl, nodes, out_fname):
     cfg = misc.config(cfg)
     df = to_frame([tbl, nodes], cfg)
     price_or_rent, _ = yaml_to_class(cfg).predict_from_cfg(df, cfg)
-    tbl.update_col_from_series(out_fname, price_or_rent)
+    tbl.update_col_from_series(out_fname, price_or_rent, cast=True)
 
 
 def lcm_estimate(cfg, choosers, chosen_fname, buildings, nodes):
@@ -198,7 +198,7 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
     new_buildings = pd.Series(units.loc[new_units.values][out_fname].values,
                               index=new_units.index)
 
-    choosers.update_col_from_series(out_fname, new_buildings)
+    choosers.update_col_from_series(out_fname, new_buildings, cast=True)
     _print_number_unplaced(choosers, out_fname)
 
     vacant_units = buildings[vacant_fname]
@@ -214,7 +214,8 @@ def simple_relocation(choosers, relocation_rate, fieldname):
     chooser_ids = np.random.choice(choosers.index, size=int(relocation_rate *
                                    len(choosers)), replace=False)
     choosers.update_col_from_series(fieldname,
-                                    pd.Series(-1, index=chooser_ids))
+                                    pd.Series(-1, index=chooser_ids),
+                                    cast=True)
 
     _print_number_unplaced(choosers, fieldname)
 
