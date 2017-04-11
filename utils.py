@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 
 import numpy as np
@@ -23,7 +25,7 @@ def change_store(store_name):
 def change_scenario(scenario):
     assert scenario in orca.get_injectable("scenario_inputs"), \
         "Invalid scenario name"
-    print "Changing scenario to '%s'" % scenario
+    print("Changing scenario to '%s'" % scenario)
     orca.add_injectable("scenario", scenario)
 
 
@@ -55,8 +57,8 @@ def deal_with_nas(df):
         s_cnt = df[col].count()
         if df_cnt != s_cnt:
             fail = True
-            print "Found %d nas or inf (out of %d) in column %s" % \
-                  (df_cnt-s_cnt, df_cnt, col)
+            print("Found %d nas or inf (out of %d) in column %s" %
+                  (df_cnt - s_cnt, df_cnt, col))
 
     assert not fail, "NAs were found in dataframe, please fix"
     return df
@@ -78,8 +80,8 @@ def fill_nas_from_config(dfname, df):
             val = df[fname].dropna().quantile()
         else:
             assert 0, "Fill type not found!"
-        print "Filling column {} with value {} ({} values)".\
-            format(fname, val, fill_cnt)
+        print("Filling column {} with value {} ({} values)"
+              .format(fname, val, fill_cnt))
         df[fname] = df[fname].fillna(val).astype(dtyp)
     return df
 
@@ -169,23 +171,25 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
     available_units = buildings[supply_fname]
     vacant_units = buildings[vacant_fname]
 
-    print "There are %d total available units" % available_units.sum()
-    print "    and %d total choosers" % len(choosers)
-    print "    but there are %d overfull buildings" % \
-          len(vacant_units[vacant_units < 0])
+    print("There are {:d} total available units\n"
+          "    and {:d} total choosers\n"
+          "    but there are {:d} overfull buildings\n"
+          .format(available_units.sum(), len(choosers),
+                  len(vacant_units[vacant_units < 0])))
 
     vacant_units = vacant_units[vacant_units > 0]
     units = locations_df.loc[np.repeat(vacant_units.index.values,
                              vacant_units.values.astype('int'))].reset_index()
 
-    print "    for a total of %d temporarily empty units" % vacant_units.sum()
-    print "    in %d buildings total in the region" % len(vacant_units)
+    print("    for a total of {:d} temporarily empty units"
+          "    in {:d} buildings total in the region"
+          .format(vacant_units.sum(), len(vacant_units)))
 
     movers = choosers_df[choosers_df[out_fname] == -1]
 
     if len(movers) > vacant_units.sum():
-        print "WARNING: Not enough locations for movers"
-        print "    reducing locations to size of movers for performance gain"
+        print("WARNING: Not enough locations for movers"
+              "    reducing locations to size of movers for performance gain")
         movers = movers.head(vacant_units.sum())
 
     new_units, _ = yaml_to_class(cfg).predict_from_cfg(movers, units, cfg)
@@ -202,15 +206,15 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
     _print_number_unplaced(choosers, out_fname)
 
     vacant_units = buildings[vacant_fname]
-    print "    and there are now %d empty units" % vacant_units.sum()
-    print "    and %d overfull buildings" % len(vacant_units[vacant_units < 0])
-
+    print("    and there are now {:d} empty units" 
+          "    and {:d} overfull buildings"
+          .format(vacant_units.sum(), len(vacant_units[vacant_units < 0])))
 
 def simple_relocation(choosers, relocation_rate, fieldname):
-    print "Total agents: %d" % len(choosers)
+    print("Total agents: %d" % len(choosers))
     _print_number_unplaced(choosers, fieldname)
 
-    print "Assinging for relocation..."
+    print("Assinging for relocation...")
     chooser_ids = np.random.choice(choosers.index, size=int(relocation_rate *
                                    len(choosers)), replace=False)
     choosers.update_col_from_series(fieldname,
@@ -224,17 +228,17 @@ def simple_transition(tbl, rate, location_fname):
     transition = GrowthRateTransition(rate)
     df = tbl.to_frame(tbl.local_columns)
 
-    print "%d agents before transition" % len(df.index)
+    print("%d agents before transition" % len(df.index))
     df, added, copied, removed = transition.transition(df, None)
-    print "%d agents after transition" % len(df.index)
+    print("%d agents after transition" % len(df.index))
 
     df.loc[added, location_fname] = -1
     orca.add_table(tbl.name, df)
 
 
 def _print_number_unplaced(df, fieldname):
-    print "Total currently unplaced: %d" % \
-          df[fieldname].value_counts().get(-1, 0)
+    print("Total currently unplaced: %d"
+          % df[fieldname].value_counts().get(-1, 0))
 
 
 def run_feasibility(parcels, parcel_price_callback,
@@ -273,12 +277,12 @@ def run_feasibility(parcels, parcel_price_callback,
     if residential_to_yearly:
         df["residential"] *= pf.config.cap_rate
 
-    print "Describe of the yearly rent by use"
-    print df[pf.config.uses].describe()
+    print("Describe of the yearly rent by use")
+    print(df[pf.config.uses].describe())
 
     d = {}
     for form in pf.config.forms:
-        print "Computing feasibility for form %s" % form
+        print("Computing feasibility for form %s" % form)
         d[form] = pf.lookup(form, df[parcel_use_allowed_callback(form)])
 
     far_predictions = pd.concat(d.values(), keys=d.keys(), axis=1)
@@ -347,8 +351,8 @@ def run_developer(forms, agents, buildings, supply_fname, parcel_size,
                                buildings[supply_fname].sum(),
                                target_vacancy)
 
-    print "{:,} feasible buildings before running developer".format(
-          len(dev.feasibility))
+    print("{:,} feasible buildings before running developer"
+          .format(len(dev.feasibility)))
 
     new_buildings = dev.pick(forms,
                              target_units,
@@ -381,13 +385,13 @@ def run_developer(forms, agents, buildings, supply_fname, parcel_size,
     if add_more_columns_callback is not None:
         new_buildings = add_more_columns_callback(new_buildings)
 
-    print "Adding {:,} buildings with {:,} {}".\
-        format(len(new_buildings),
-               int(new_buildings[supply_fname].sum()),
-               supply_fname)
+    print("Adding {:,} buildings with {:,} {}"
+          .format(len(new_buildings),
+                  int(new_buildings[supply_fname].sum()),
+                  supply_fname))
 
-    print "{:,} feasible buildings after running developer".format(
-          len(dev.feasibility))
+    print("{:,} feasible buildings after running developer"
+          .format(len(dev.feasibility)))
 
     all_buildings = dev.merge(buildings.to_frame(buildings.local_columns),
                               new_buildings[buildings.local_columns])
