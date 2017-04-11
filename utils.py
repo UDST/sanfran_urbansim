@@ -173,7 +173,7 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
 
     print("There are {} total available units\n"
           "    and {} total choosers\n"
-          "    but there are {} overfull buildings\n"
+          "    but there are {} overfull buildings"
           .format(available_units.sum(), len(choosers),
                   len(vacant_units[vacant_units < 0])))
 
@@ -181,7 +181,7 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
     units = locations_df.loc[np.repeat(vacant_units.index.values,
                              vacant_units.values.astype('int'))].reset_index()
 
-    print("    for a total of {} temporarily empty units"
+    print("    for a total of {} temporarily empty units\n"
           "    in {} buildings total in the region"
           .format(int(vacant_units.sum()), len(vacant_units)))
 
