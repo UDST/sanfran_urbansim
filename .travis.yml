@@ -24,7 +24,7 @@ install:
 - source activate test-environment
 - pip install https://github.com/udst/orca/archive/master.zip
 - pip install bottle simplejson zbox
-- pip install https://github.com/udst/urbansim/archive/master.zip
+- pip install -b python3 https://github.com/pksohn/urbansim/archive/master.zip
 before_script:
 - jupyter nbconvert --to python Simulation.ipynb
 script:
