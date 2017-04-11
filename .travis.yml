@@ -2,6 +2,7 @@ language: python
 sudo: false
 python:
 - '2.7'
+- '3.5'
 install:
 - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
     wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
@@ -16,15 +17,16 @@ install:
 # Useful for debugging any issues with conda
 - conda info -a
 - >
-  conda create -q -c synthicity -n test-environment
+  conda create -q -n test-environment
   python=$TRAVIS_PYTHON_VERSION
   cytoolz ipython-notebook jinja2 matplotlib numpy pandas patsy pip scipy
   statsmodels pytables pytest pyyaml
 - source activate test-environment
-- pip install bottle orca simplejson zbox
-- pip install https://github.com/synthicity/urbansim/archive/master.zip
+- pip install https://github.com/udst/orca/archive/master.zip
+- pip install bottle simplejson zbox
+- pip install https://github.com/udst/urbansim/archive/master.zip
 before_script:
-- ipython nbconvert --to python Simulation.ipynb
+- jupyter nbconvert --to python Simulation.ipynb
 script:
 - python Simulation.py
 notifications:
