@@ -171,9 +171,9 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
     available_units = buildings[supply_fname]
     vacant_units = buildings[vacant_fname]
 
-    print("There are {:d} total available units\n"
-          "    and {:d} total choosers\n"
-          "    but there are {:d} overfull buildings\n"
+    print("There are {} total available units\n"
+          "    and {} total choosers\n"
+          "    but there are {} overfull buildings\n"
           .format(available_units.sum(), len(choosers),
                   len(vacant_units[vacant_units < 0])))
 
@@ -181,9 +181,9 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
     units = locations_df.loc[np.repeat(vacant_units.index.values,
                              vacant_units.values.astype('int'))].reset_index()
 
-    print("    for a total of {:d} temporarily empty units"
-          "    in {:d} buildings total in the region"
-          .format(vacant_units.sum(), len(vacant_units)))
+    print("    for a total of {} temporarily empty units"
+          "    in {} buildings total in the region"
+          .format(int(vacant_units.sum()), len(vacant_units)))
 
     movers = choosers_df[choosers_df[out_fname] == -1]
 
@@ -206,9 +206,10 @@ def lcm_simulate(cfg, choosers, buildings, nodes, out_fname,
     _print_number_unplaced(choosers, out_fname)
 
     vacant_units = buildings[vacant_fname]
-    print("    and there are now {:d} empty units" 
-          "    and {:d} overfull buildings"
+    print("    and there are now {} empty units" 
+          "    and {} overfull buildings"
           .format(vacant_units.sum(), len(vacant_units[vacant_units < 0])))
+
 
 def simple_relocation(choosers, relocation_rate, fieldname):
     print("Total agents: %d" % len(choosers))
