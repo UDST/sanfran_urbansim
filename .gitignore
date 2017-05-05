@@ -57,3 +57,6 @@ docs/_build/
 
 # Test run artifact
 Simulation.py
+
+# PyCharm
+.idea
